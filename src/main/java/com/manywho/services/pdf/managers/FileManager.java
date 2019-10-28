@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FileManager {
     private S3Configuration s3Config;
@@ -70,31 +71,11 @@ public class FileManager {
     }
 
     public $File concatenatePdf(List<$File> files) throws Exception {
-        ByteArrayOutputStream mergedPdfOutputStream = new ByteArrayOutputStream();
-        Document document = new Document();
-        PdfCopy copy = new PdfCopy(document, mergedPdfOutputStream);
-        document.open();
-        for ($File file:files) {
-            addPdfPages(this.getFileContent(file.getId()), copy);
-        }
-        document.close();
+        InputStream pdf = this.pdfGeneratorService.concatenatePdfs(
+            files.stream().map(file -> this.getFileContent(file.getId())).collect(Collectors.toList())
+        );
 
-        return uploadFile(new ByteArrayInputStream(mergedPdfOutputStream.toByteArray()));
-    }
-
-    private void addPdfPages(InputStream originalInputStream, PdfCopy copy) throws IOException, BadPdfFormatException {
-        PdfImportedPage page;
-        PdfCopy.PageStamp stamp;
-        PdfReader reader = new PdfReader(originalInputStream);
-        int numberOfPages = reader.getNumberOfPages();
-
-        for (int pageNumber = 0; pageNumber < numberOfPages; ) {
-            page = copy.getImportedPage(reader, ++pageNumber);
-            stamp = copy.createPageStamp(page);
-            stamp.alterContents();
-            copy.addPage(page);
-        }
-        reader.close();
+        return uploadFile(pdf);
     }
 
     public $File getS3FilePopulated(String fileId, List<FormField> fieldList) throws IOException {

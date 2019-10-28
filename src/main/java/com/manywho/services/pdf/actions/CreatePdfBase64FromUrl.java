@@ -2,10 +2,9 @@ package com.manywho.services.pdf.actions;
 
 import com.manywho.sdk.api.ContentType;
 import com.manywho.sdk.services.actions.Action;
-import com.manywho.sdk.services.types.system.$File;
 
-@Action.Metadata(name = "Create PDF from URL", summary = "Create PDF from URL", uri = "pdf-from-url-base64")
-public class CreatePdfFromUrl {
+@Action.Metadata(name = "Create PDF from URL", summary = "Create PDF from URL", uri = "pdf-from-url")
+public class CreatePdfBase64FromUrl {
 
     public static class Input {
         @Action.Input(name = "PDF URL", contentType = ContentType.String, required = true)
@@ -17,11 +16,11 @@ public class CreatePdfFromUrl {
     }
 
     public static class Output {
-        @Action.Output(name = "PDF File", contentType = ContentType.Object)
-        private $File pdfFile;
+        @Action.Output(name = "PDF (Base64 Encoded)", contentType = ContentType.String)
+        private String pdf;
 
-        public Output($File pdfFile) {
-            this.pdfFile = pdfFile;
+        public Output(String pdf) {
+            this.pdf = pdf;
         }
     }
 }

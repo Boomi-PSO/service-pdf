@@ -1,7 +1,11 @@
 package com.manywho.services.pdf.services;
 
+import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.AcroFields;
+import com.lowagie.text.pdf.BadPdfFormatException;
+import com.lowagie.text.pdf.PdfCopy;
+import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import com.manywho.sdk.api.ContentType;
@@ -94,5 +98,33 @@ public class PdfGeneratorService {
         }
 
         return formFields;
+    }
+
+    public InputStream concatenatePdfs(List<InputStream> pdfs) throws Exception {
+        ByteArrayOutputStream mergedPdfOutputStream = new ByteArrayOutputStream();
+        Document document = new Document();
+        PdfCopy copy = new PdfCopy(document, mergedPdfOutputStream);
+        document.open();
+        for (InputStream pdf:pdfs) {
+            addPdfPages(pdf, copy);
+        }
+        document.close();
+
+        return new ByteArrayInputStream(mergedPdfOutputStream.toByteArray());
+    }
+
+    private void addPdfPages(InputStream originalInputStream, PdfCopy copy) throws IOException, BadPdfFormatException {
+        PdfImportedPage page;
+        PdfCopy.PageStamp stamp;
+        PdfReader reader = new PdfReader(originalInputStream);
+        int numberOfPages = reader.getNumberOfPages();
+
+        for (int pageNumber = 0; pageNumber < numberOfPages; ) {
+            page = copy.getImportedPage(reader, ++pageNumber);
+            stamp = copy.createPageStamp(page);
+            stamp.alterContents();
+            copy.addPage(page);
+        }
+        reader.close();
     }
 }
