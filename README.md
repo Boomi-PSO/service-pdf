@@ -1,3 +1,5 @@
+This fork added support for Base64 encoded PDF's: https://github.com/Boomi-PSO/service-pdf/commit/f322453c66a2bd8095fc123b3275c74024c0267c
+
 Pdf Service
 ===========
 
